@@ -18,11 +18,16 @@ AMyCharacter::AMyCharacter()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 
-	//SpringArm의 Target Arm Length를 400.0f 으로 설정
-	SpringArm->TargetArmLength = 400.0f;
 
-	//SpringArm의 회전을 Pitch에 -25.0 값 설정
-	SpringArm->SetRelativeRotation(FRotator(-25.0, 0.0, 0.0));
+	SpringArm->SetupAttachment(RootComponent);
+
+	Camera->SetupAttachment(SpringArm);
+	
+	SpringArm->TargetArmLength = 400.0f;
+	//SpringArm의 위치와 회전값 적용
+	SpringArm->SetRelativeLocationAndRotation(FVector(0.0, 0.0, 100.0), FRotator(-25.0, 0.0, 0.0));
+
+
 }
 
 void AMyCharacter::BeginPlay()
