@@ -26,5 +26,9 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+public:
+	//void 함수이름(float value);
+	void KeyUpDown(float value);
+	void KeyLeftRight(float value);
 
 };
