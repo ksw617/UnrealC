@@ -13,14 +13,29 @@ UCLASS()
 class UNREALCTUTORIAL_API UMyAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-public:
-	UPROPERTY(Category = "Character Movement", EditAnywhere, BlueprintReadOnly)
+private:
+	UPROPERTY(Category = "Character Move", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	bool ShouldMove;
+	UPROPERTY(Category = "Character Move", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	float Horizontal;
+	UPROPERTY(Category = "Character Move", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	float Vertical;
+
 private:
 	UPROPERTY(VisibleAnywhere)
+	class ACharacter* Character;
+	UPROPERTY(VisibleAnywhere)
 	class UCharacterMovementComponent* CharacterMovement;
+	UPROPERTY(VisibleAnywhere)
+	UAnimMontage* AttackMontage;
+public:
+	UMyAnimInstance();
 
 public:
 	virtual void NativeBeginPlay() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+public:
+	void PlayAttackMontage();
 	
 };

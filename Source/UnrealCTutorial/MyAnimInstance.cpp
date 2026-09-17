@@ -6,26 +6,64 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 
+UMyAnimInstance::UMyAnimInstance()
+{
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage(TEXT("/Game/ParagonGreystone/Characters/Heroes/Greystone/Animations/Attack_PrimaryA_Montage.Attack_PrimaryA_Montage"));
+
+	if (AnimMontage.Succeeded())
+	{
+		AttackMontage = AnimMontage.Object;
+	}
+}
+
 void UMyAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 
 	auto Pawn = TryGetPawnOwner();
 
-	//만약에 Pawn이 존재 한다면
 	if (IsValid(Pawn))
 	{
-		//형변환
-		auto Character = Cast<ACharacter>(Pawn);
+		Character = Cast<ACharacter>(Pawn);
 
-		//만약에 Character가 존재 한다면
 		if (IsValid(Character))
 		{
-			//CharacterMovement에 Character에 있는 CharacterMovement를 넣어줌
 			CharacterMovement = Character->GetCharacterMovement();
 		}
 	}
 
 
+}
+
+void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+{
+	if (IsValid(CharacterMovement))
+	{
+		FVector Velocity = CharacterMovement->Velocity;
+		float GroundSpeed = Velocity.Size2D();
+
+		FRotator ActorRotation = Character->GetActorRotation();
+		FVector UnrotateVector = ActorRotation.UnrotateVector(Velocity);
+		UnrotateVector.Normalize();
+
+		Vertical = UnrotateVector.X;
+		Horizontal = UnrotateVector.Y;
+
+		auto Acceleration = CharacterMovement->GetCurrentAcceleration();
+
+		ShouldMove = GroundSpeed > 0.1 && Acceleration != FVector::Zero();
+
+	}
+}
+
+void UMyAnimInstance::PlayAttackMontage()
+{
+	if (IsValid(AttackMontage))
+	{
+		if (!Montage_IsPlaying(AttackMontage))
+		{
+			Montage_Play(AttackMontage);
+		}
+	}
 }
 
