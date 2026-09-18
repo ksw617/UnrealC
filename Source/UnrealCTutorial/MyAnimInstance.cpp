@@ -2,8 +2,8 @@
 
 
 #include "MyAnimInstance.h"
-#include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"		   
+#include "MyCharacter.h" // MyCharacter.h 불러오고
 
 
 UMyAnimInstance::UMyAnimInstance()
@@ -24,7 +24,8 @@ void UMyAnimInstance::NativeBeginPlay()
 
 	if (IsValid(Pawn))
 	{
-		Character = Cast<ACharacter>(Pawn);
+		//ACharacter -> AMyCharacter
+		Character = Cast<AMyCharacter>(Pawn);
 
 		if (IsValid(Character))
 		{
@@ -39,8 +40,10 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	if (IsValid(CharacterMovement))
 	{
-		FVector Velocity = CharacterMovement->Velocity;
-		float GroundSpeed = Velocity.Size2D();
+		Velocity = CharacterMovement->Velocity;
+		GroundSpeed = Velocity.Size2D();
+		IsFalling = CharacterMovement->IsFalling();
+		
 
 		FRotator ActorRotation = Character->GetActorRotation();
 		FVector UnrotateVector = ActorRotation.UnrotateVector(Velocity);
@@ -53,6 +56,8 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 		ShouldMove = GroundSpeed > 0.1 && Acceleration != FVector::Zero();
 
+
+
 	}
 }
 
@@ -63,6 +68,8 @@ void UMyAnimInstance::PlayAttackMontage()
 		if (!Montage_IsPlaying(AttackMontage))
 		{
 			Montage_Play(AttackMontage);
+
+			Character->PlayerAttack();
 		}
 	}
 }

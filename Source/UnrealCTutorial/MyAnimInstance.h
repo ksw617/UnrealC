@@ -20,10 +20,17 @@ private:
 	float Horizontal;
 	UPROPERTY(Category = "Character Move", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float Vertical;
+private:
+	UPROPERTY(Category = "Character Jump", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	FVector Velocity;
+	UPROPERTY(Category = "Character Jump", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	float GroundSpeed;
+	UPROPERTY(Category = "Character Jump", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	bool IsFalling;
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	class ACharacter* Character;
+	class AMyCharacter* Character;
 	UPROPERTY(VisibleAnywhere)
 	class UCharacterMovementComponent* CharacterMovement;
 	UPROPERTY(VisibleAnywhere)
