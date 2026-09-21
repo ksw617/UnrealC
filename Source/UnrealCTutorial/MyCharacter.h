@@ -39,5 +39,5 @@ public:
 public:
 	void KeyAttack();
 public:
-	void PlayerAttack(); // Capsule Trace Channel 발생 시켜서 충돌
+	void PlayerAttack();
 };

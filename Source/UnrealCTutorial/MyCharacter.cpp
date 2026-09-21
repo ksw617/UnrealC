@@ -2,6 +2,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "MyAnimInstance.h" 
+#include "Kismet/GameplayStatics.h"	//추가
 
 AMyCharacter::AMyCharacter()
 {
@@ -97,27 +98,50 @@ void AMyCharacter::PlayerAttack()
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	float AttackRange = 200.f;		//공격범위
-	float AttackRadius = 40.f;		//캡슐의 반지름
-	float AttackHalfHeight = 90.f;	//캡슐의 높이의 반 길이
-	FVector StartPos = GetActorLocation(); //시작 위치 : 현재 Actor의 위치
-	FVector EndPos = StartPos + GetActorForwardVector() * AttackRange;
+	float AttackRange = 200.f;		
+	float AttackRadius = 40.f;		
+	float AttackHalfHeight = 90.f;	
+	FVector StartPos = GetActorLocation();
+	FVector FwdVector = GetActorForwardVector() * AttackRange;
+	FVector EndPos = StartPos + FwdVector;
 
 	bool Result = GetWorld()->SweepSingleByChannel
 	(
-		OUT HitResult,			//충돌 결과를 저장하는 변수
-		StartPos,				//시작지점
-		EndPos,					//끝 지점
-		FQuat::Identity,		//회전 (기본값)
-		ECC_Visibility,			//충돌 채널(Visibility)
-		FCollisionShape::MakeCapsule(AttackRadius, AttackHalfHeight), // 충돌 형태
+		OUT HitResult,			
+		StartPos,				
+		EndPos,					
+		FQuat::Identity,		
+		ECC_GameTraceChannel1,
+		FCollisionShape::MakeCapsule(AttackRadius, AttackHalfHeight), 
 		Params
 	);
-											
-	//충돌이 되었다면
-	if (Result)
+
+	FQuat AttackRotation = FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat();
+	FColor DebugColor = Result ? FColor::Green : FColor::Red;
+
+	FVector Center = StartPos + FwdVector * 0.5f;
+
+
+	DrawDebugCapsule
+	(
+		GetWorld(),			
+		Center,		
+		AttackHalfHeight,	
+		AttackRadius,		
+		AttackRotation,		
+		DebugColor,			
+		false,				
+		2.0f				
+	);
+
+
+	if (Result && HitResult.GetActor())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Collision"));
+
+		//AActor* Target = HitResult.GetActor();
+		auto Target = HitResult.GetActor();
+
+		UGameplayStatics::ApplyDamage(Target, 10.f, GetController(), this, NULL);
 	}
 
 
