@@ -2,6 +2,9 @@
 
 #include "Enemy.h"
 #include "EnemyAIController.h"
+#include "EnemyAnimInstance.h"
+#include "Components/WidgetComponent.h"
+#include "HpUserWidget.h"
 
 AEnemy::AEnemy()
 {
@@ -22,11 +25,20 @@ AEnemy::AEnemy()
 	}
 
 	AIControllerClass = AEnemyAIController::StaticClass();
+
+	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
+	HpBar->SetupAttachment(GetRootComponent());
+	HpBar->SetRelativeLocation(FVector(0.0, 0.0, 130.0));
+	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+	HpBar->SetDrawSize(FVector2D(200.0, 20.0));
+
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	EnemyAnimInstace = Cast<UEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	EnemyAnimInstace->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
 	
 }
 
@@ -46,5 +58,22 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 {
 	UE_LOG(LogTemp, Log, TEXT("Damaged : %f"), Damage);
 	return 0.0f;
+}
+
+void AEnemy::EnemyAttack()
+{
+	if (IsValid(EnemyAnimInstace))
+	{
+		if (!IsAttacking)
+		{
+			EnemyAnimInstace->PlayAttackMontage();
+			IsAttacking = true;
+		}
+	}
+}
+
+void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterupted)
+{
+	IsAttacking = false;
 }
 
