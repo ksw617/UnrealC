@@ -5,6 +5,8 @@
 #include "EnemyAnimInstance.h"
 #include "Components/WidgetComponent.h"
 #include "HpUserWidget.h"
+#include "HpComponent.h"
+
 
 AEnemy::AEnemy()
 {
@@ -32,6 +34,14 @@ AEnemy::AEnemy()
 	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
 	HpBar->SetDrawSize(FVector2D(200.0, 20.0));
 
+	static ConstructorHelpers::FClassFinder<UHpUserWidget> UserWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"));
+	if (UserWidget.Succeeded())
+	{
+		HpBar->SetWidgetClass(UserWidget.Class);
+	}
+
+	HpComponent = CreateDefaultSubobject<UHpComponent>(TEXT("HP Component"));
+
 }
 
 void AEnemy::BeginPlay()
@@ -40,6 +50,12 @@ void AEnemy::BeginPlay()
 	EnemyAnimInstace = Cast<UEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	EnemyAnimInstace->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
 	
+
+	auto HpWidget = Cast<UHpUserWidget>(HpBar->GetUserWidgetObject());
+	if (HpWidget)
+	{
+		HpWidget->BindHp(HpComponent);
+	}
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -56,8 +72,9 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Log, TEXT("Damaged : %f"), Damage);
-	return 0.0f;
+	HpComponent->OnDamaged(Damage);
+	
+	return Damage;
 }
 
 void AEnemy::EnemyAttack()

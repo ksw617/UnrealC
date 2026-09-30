@@ -6,15 +6,21 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+class UEnemyAnimInstance;
+class UWidgetComponent;
+class UHpComponent;
+
 UCLASS()
 class UNREALCTUTORIAL_API AEnemy : public ACharacter
 {
 	GENERATED_BODY()
-public:
+private:
 	UPROPERTY(VisibleAnywhere)
-	class UEnemyAnimInstance* EnemyAnimInstace;
+	TObjectPtr<UEnemyAnimInstance> EnemyAnimInstace;
 	UPROPERTY(VisibleAnywhere)
-	class UWidgetComponent* HpBar;
+	TObjectPtr<UWidgetComponent> HpBar;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UHpComponent> HpComponent;
 private:
 	bool IsAttacking = false;
 public:
