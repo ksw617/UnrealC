@@ -6,6 +6,8 @@
 #include "Animation/AnimInstance.h"
 #include "MyAnimInstance.generated.h"
 
+class AMyPlayer;
+class UCharacterMovementComponent;
 /**
  * 
  */
@@ -27,14 +29,20 @@ private:
 	float GroundSpeed;
 	UPROPERTY(Category = "Character Jump", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	bool IsFalling;
+private:
+	//Ãß°¡
+	UPROPERTY(Category = "Aim", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	float YawOffset;
+	UPROPERTY(Category = "Aim", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	FRotator AimRotation;
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	class AMyCharacter* Character;
+	TObjectPtr<AMyPlayer> Character;
 	UPROPERTY(VisibleAnywhere)
-	class UCharacterMovementComponent* CharacterMovement;
+	TObjectPtr<UCharacterMovementComponent> CharacterMovement;
 	UPROPERTY(VisibleAnywhere)
-	UAnimMontage* AttackMontage;
+	TObjectPtr<UAnimMontage> AttackMontage;
 public:
 	UMyAnimInstance();
 

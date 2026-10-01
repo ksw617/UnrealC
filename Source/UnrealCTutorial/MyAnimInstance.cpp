@@ -3,12 +3,13 @@
 
 #include "MyAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"		   
-#include "MyCharacter.h" // MyCharacter.h 불러오고
+#include "MyPlayer.h" 
+#include "Kismet/KismetMathLibrary.h"// 추가
 
 
 UMyAnimInstance::UMyAnimInstance()
 {
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage(TEXT("/Game/ParagonGreystone/Characters/Heroes/Greystone/Animations/Attack_PrimaryA_Montage.Attack_PrimaryA_Montage"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMontage(TEXT("/Game/ParagonSparrow/Characters/Heroes/Sparrow/Animations/Primary_Fire_Med_Montage.Primary_Fire_Med_Montage"));
 
 	if (AnimMontage.Succeeded())
 	{
@@ -19,14 +20,13 @@ UMyAnimInstance::UMyAnimInstance()
 void UMyAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
-
+	
 	auto Pawn = TryGetPawnOwner();
-
+	
 	if (IsValid(Pawn))
 	{
-		//ACharacter -> AMyCharacter
-		Character = Cast<AMyCharacter>(Pawn);
-
+		Character = Cast<AMyPlayer>(Pawn);
+	
 		if (IsValid(Character))
 		{
 			CharacterMovement = Character->GetCharacterMovement();
@@ -56,6 +56,16 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 		ShouldMove = GroundSpeed > 0.1 && Acceleration != FVector::Zero();
 
+		AimRotation = Character->GetBaseAimRotation();
+
+		FRotator RotFromX = UKismetMathLibrary::MakeRotFromX(Velocity);
+
+		FRotator DeltaRotation = RotFromX - AimRotation;
+		DeltaRotation.Normalize();
+
+		YawOffset = DeltaRotation.Yaw;
+
+		UE_LOG(LogTemp, Log, TEXT("Yaw Offset : %f"), YawOffset);
 
 
 	}

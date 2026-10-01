@@ -4,9 +4,9 @@
 #include "MyPlayer.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "EnhancedInputComponent.h"		//추가
-#include "EnhancedInputSubsystems.h"	//추가
-
+#include "EnhancedInputComponent.h"		
+#include "EnhancedInputSubsystems.h"	
+#include "MyAnimInstance.h" 
 
 AMyPlayer::AMyPlayer()
 {
@@ -42,6 +42,8 @@ AMyPlayer::AMyPlayer()
 void AMyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AnimInstace = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
 	
 }
 
@@ -76,19 +78,42 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMyPlayer::Move(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Move"));
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0.0, Rotation.Yaw, 0.0);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
 }
 
 void AMyPlayer::Look(const FInputActionValue & Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Look"));
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	if (IsValid(Controller))
+	{
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
 }
 
 void AMyPlayer::Fire(const FInputActionValue & Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Fire"));
+	if (IsValid(AnimInstace))
+	{
+		AnimInstace->PlayAttackMontage();
+	}
 }
 
 void AMyPlayer::PlayerAttack()
-{}
+{
+	UE_LOG(LogTemp, Log, TEXT("Player Attack"));
+}
 

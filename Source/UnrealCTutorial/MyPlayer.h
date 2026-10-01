@@ -12,6 +12,8 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+class UMyAnimInstance;	   //전방선언
+
 UCLASS()
 class UNREALCTUTORIAL_API AMyPlayer : public ACharacter
 {
@@ -21,6 +23,10 @@ private:
 	TObjectPtr<USpringArmComponent> SpringArm;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
+private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UMyAnimInstance> AnimInstace;
+	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta=(AllowPrivateAccess = true))
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
