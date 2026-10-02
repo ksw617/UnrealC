@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"		
 #include "EnhancedInputSubsystems.h"	
 #include "MyAnimInstance.h" 
+#include "Arrow.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -29,6 +30,7 @@ AMyPlayer::AMyPlayer()
 	SpringArm->TargetArmLength = 400.f;
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0, 0.0, 100.0), FRotator(-25.0, 0.0, 0.0));
 	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->SocketOffset = FVector(0.0, 120.0, 0.0);	// 위치 이동
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AI(TEXT("/Script/Engine.AnimBlueprint'/Game/Animations/ABP_Player.ABP_Player_C'"));
 
@@ -109,6 +111,17 @@ void AMyPlayer::Fire(const FInputActionValue & Value)
 	if (IsValid(AnimInstace))
 	{
 		AnimInstace->PlayAttackMontage();
+
+		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
+		FVector SocketLocation = SocketTransform.GetLocation();
+		FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
+
+		FActorSpawnParameters Params;
+		Params.Owner = this;
+
+		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, Params);
+
+
 	}
 }
 
