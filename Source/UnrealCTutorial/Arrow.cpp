@@ -4,6 +4,8 @@
 #include "Arrow.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Particles/ParticleSystem.h"		
+#include "Kismet/GameplayStatics.h"			
 
 AArrow::AArrow()
 {
@@ -20,6 +22,12 @@ AArrow::AArrow()
 	if (SM.Succeeded())
 	{
 		Mesh->SetStaticMesh(SM.Object);
+
+		static ConstructorHelpers::FObjectFinder<UMaterial> MAT(TEXT("/Game/ParagonSparrow/Characters/Heroes/Sparrow/Materials/M_Sparrow_Arrow.M_Sparrow_Arrow"));
+		if (MAT.Succeeded())
+		{
+			Mesh->SetMaterial(0, MAT.Object);
+		}
 	}
 
 	Mesh->SetupAttachment(RootComponent);
@@ -39,11 +47,30 @@ AArrow::AArrow()
 	ProjectileMovement->MaxSpeed = 3000.0;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 
+	//Particle 불러오고
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> PS(TEXT("/Game/ParagonSparrow/FX/Particles/Sparrow/Abilities/Primary/FX/P_Sparrow_HitHero.P_Sparrow_HitHero"));
+	if (PS.Succeeded())
+	{
+		HitParticle = PS.Object;
+	}
+
 }
 
 void AArrow::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Log, TEXT("OnOverlapBegin : %s"), *OtherActor->GetName());
+	ProjectileMovement->StopMovementImmediately();
+	ProjectileMovement->ProjectileGravityScale = 0.f;
+
+	AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
+	CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, CollisionBox->GetComponentLocation(), FRotator::ZeroRotator, true);
+
+	//데미지 주고
+	UGameplayStatics::ApplyDamage(OtherActor, 10.f, ProjectileMovement->GetOwner()->GetInstigatorController(), ProjectileMovement->GetOwner(), NULL);
+
+	//3초후 사라지게
+	FTimerHandle TimerHandler;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandler, [&]() {Destroy(); }, 3.f, false);
 }
 
 

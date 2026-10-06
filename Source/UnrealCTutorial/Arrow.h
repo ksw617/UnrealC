@@ -8,6 +8,7 @@
 
 class UBoxComponent;
 class UProjectileMovementComponent;
+class UParticleSystem;
 
 UCLASS()
 class UNREALCTUTORIAL_API AArrow : public AActor
@@ -20,6 +21,8 @@ private:
 	TObjectPtr<UBoxComponent> CollisionBox;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UParticleSystem> HitParticle;
 	
 public:	
 	AArrow();

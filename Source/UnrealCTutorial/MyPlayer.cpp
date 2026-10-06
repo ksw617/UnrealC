@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"	
 #include "MyAnimInstance.h" 
 #include "Arrow.h"
+#include "Kismet/GameplayStatics.h" // 추가
 
 AMyPlayer::AMyPlayer()
 {
@@ -70,7 +71,7 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayer::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyPlayer::Look);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AMyPlayer::Fire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AMyPlayer::Fire);
 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -112,14 +113,31 @@ void AMyPlayer::Fire(const FInputActionValue & Value)
 	{
 		AnimInstace->PlayAttackMontage();
 
-		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
-		FVector SocketLocation = SocketTransform.GetLocation();
-		FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
+		float AttackRange = MAX_flt; //MAX_FLT;
 
-		FActorSpawnParameters Params;
-		Params.Owner = this;
+		FHitResult HitResult;
 
-		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, Params);
+		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+
+		FVector AimLocation = CameraManager->GetCameraLocation();
+		FVector TargetLocation = AimLocation + CameraManager->GetActorForwardVector() * AttackRange;
+
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		bool Result = GetWorld()->LineTraceSingleByChannel
+		(
+			OUT HitResult,
+			AimLocation,
+			TargetLocation,
+			ECollisionChannel::ECC_Visibility,
+			Params
+		);
+
+		if (Result)
+		{
+			UE_LOG(LogTemp, Log, TEXT("충돌"));
+		}
 
 
 	}
@@ -127,6 +145,15 @@ void AMyPlayer::Fire(const FInputActionValue & Value)
 
 void AMyPlayer::PlayerAttack()
 {
-	UE_LOG(LogTemp, Log, TEXT("Player Attack"));
+	FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
+	FVector SocketLocation = SocketTransform.GetLocation();
+	FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
+
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+	Params.Instigator = this;
+
+	auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, Params);
+
 }
 

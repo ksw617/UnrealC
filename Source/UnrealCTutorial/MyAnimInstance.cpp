@@ -4,7 +4,7 @@
 #include "MyAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"		   
 #include "MyPlayer.h" 
-#include "Kismet/KismetMathLibrary.h"// Ãß°¡
+#include "Kismet/KismetMathLibrary.h"
 
 
 UMyAnimInstance::UMyAnimInstance()
@@ -65,7 +65,7 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 		YawOffset = DeltaRotation.Yaw;
 
-		UE_LOG(LogTemp, Log, TEXT("Yaw Offset : %f"), YawOffset);
+		//UE_LOG(LogTemp, Log, TEXT("Yaw Offset : %f"), YawOffset);
 
 
 	}
@@ -79,8 +79,13 @@ void UMyAnimInstance::PlayAttackMontage()
 		{
 			Montage_Play(AttackMontage);
 
-			Character->PlayerAttack();
+			//Character->PlayerAttack();
 		}
 	}
+}
+
+void UMyAnimInstance::AnimNotify_Shoot()
+{
+	Character->PlayerAttack();
 }
 

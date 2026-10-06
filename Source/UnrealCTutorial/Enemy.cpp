@@ -73,6 +73,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	HpComponent->OnDamaged(Damage);
+
+	UE_LOG(LogTemp, Log, TEXT("Causer %s"), *EventInstigator->GetPawn().GetName());
 	
 	return Damage;
 }
