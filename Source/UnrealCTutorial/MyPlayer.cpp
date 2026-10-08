@@ -8,7 +8,10 @@
 #include "EnhancedInputSubsystems.h"	
 #include "MyAnimInstance.h" 
 #include "Arrow.h"
-#include "Kismet/GameplayStatics.h" // 추가
+#include "Kismet/GameplayStatics.h" 
+#include "Components/WidgetComponent.h"
+#include "HpUserWidget.h"
+#include "HpComponent.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -31,7 +34,7 @@ AMyPlayer::AMyPlayer()
 	SpringArm->TargetArmLength = 400.f;
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0, 0.0, 100.0), FRotator(-25.0, 0.0, 0.0));
 	SpringArm->bUsePawnControlRotation = true;
-	SpringArm->SocketOffset = FVector(0.0, 120.0, 0.0);	// 위치 이동
+	SpringArm->SocketOffset = FVector(0.0, 120.0, 0.0);	
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AI(TEXT("/Script/Engine.AnimBlueprint'/Game/Animations/ABP_Player.ABP_Player_C'"));
 
@@ -39,6 +42,21 @@ AMyPlayer::AMyPlayer()
 	{
 		GetMesh()->SetAnimClass(AI.Class);
 	}
+
+	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
+	HpBar->SetupAttachment(GetRootComponent());
+	HpBar->SetRelativeLocation(FVector(0.0, 0.0, 130.0));
+	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+	HpBar->SetDrawSize(FVector2D(200.0, 20.0));
+
+	static ConstructorHelpers::FClassFinder<UHpUserWidget> UserWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"));
+	if (UserWidget.Succeeded())
+	{
+		HpBar->SetWidgetClass(UserWidget.Class);
+	}
+
+	HpComponent = CreateDefaultSubobject<UHpComponent>(TEXT("HP Component"));
+
 }
 
 
@@ -113,7 +131,7 @@ void AMyPlayer::Fire(const FInputActionValue & Value)
 	{
 		AnimInstace->PlayAttackMontage();
 
-		float AttackRange = MAX_flt; //MAX_FLT;
+		float AttackRange = 100000.f;
 
 		FHitResult HitResult;
 
@@ -135,20 +153,20 @@ void AMyPlayer::Fire(const FInputActionValue & Value)
 		);
 
 		if (Result)
-		{
-			UE_LOG(LogTemp, Log, TEXT("충돌"));
-		}
+			TargetLocation = HitResult.ImpactPoint;
 
+		DrawDebugLine(GetWorld(), AimLocation, TargetLocation, Result ? FColor::Green : FColor::Red, true);
 
+		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
+		SocketLocation = SocketTransform.GetLocation();
+		FVector DeltaVector = TargetLocation - SocketLocation;
+		SocketRotation = FRotationMatrix::MakeFromX(DeltaVector).Rotator();
 	}
 }
 
 void AMyPlayer::PlayerAttack()
 {
-	FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
-	FVector SocketLocation = SocketTransform.GetLocation();
-	FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
-
+	
 	FActorSpawnParameters Params;
 	Params.Owner = this;
 	Params.Instigator = this;

@@ -11,8 +11,9 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
-
-class UMyAnimInstance;	   //전방선언
+class UMyAnimInstance;	 
+class UWidgetComponent;
+class UHpComponent;
 
 UCLASS()
 class UNREALCTUTORIAL_API AMyPlayer : public ACharacter
@@ -26,6 +27,16 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UMyAnimInstance> AnimInstace;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UWidgetComponent> HpBar;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UHpComponent> HpComponent;
+
+private:
+	 UPROPERTY(VisibleAnywhere)
+	 FVector SocketLocation;
+	 UPROPERTY(VisibleAnywhere)
+	 FRotator SocketRotation;
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta=(AllowPrivateAccess = true))

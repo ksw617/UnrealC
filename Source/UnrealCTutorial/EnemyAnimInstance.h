@@ -9,6 +9,10 @@
 /**
  * 
  */
+
+class AEnemy;
+class UCharacterMovementComponent;
+
 UCLASS()
 class UNREALCTUTORIAL_API UEnemyAnimInstance : public UAnimInstance
 {
@@ -18,9 +22,11 @@ public:
 	bool ShouldMove;
 public:
 	UPROPERTY(VisibleAnywhere)
-	UAnimMontage* AttackMontage;
+	TObjectPtr<AEnemy> Enemy;
 	UPROPERTY(VisibleAnywhere)
-	class UCharacterMovementComponent* CharacterMovement;
+	TObjectPtr<UAnimMontage> AttackMontage;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCharacterMovementComponent> CharacterMovement;
 public:
 	UEnemyAnimInstance();
 public:
@@ -28,5 +34,8 @@ public:
 public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+public:
+	UFUNCTION()
+	void AnimNotify_Hit();
 	
 };
