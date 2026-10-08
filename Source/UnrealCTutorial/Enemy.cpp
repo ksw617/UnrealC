@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "HpUserWidget.h"
 #include "HpComponent.h"
+#include "Kismet/GameplayStatics.h"	 //추가
 
 
 AEnemy::AEnemy()
@@ -99,25 +100,26 @@ void AEnemy::EnemyHit()
 	float AttackRange = 200.f;
 	float AttackRadius = 40.f;
 	float AttackHalfHeight = 90.f;
+
 	FVector startPos = GetActorLocation();
-	FVector FwdVector = GetActorForwardVector() * AttackRange;
+	FVector Forward = GetActorForwardVector();
+	FVector FwdVector = Forward * AttackRange;
 
 	FVector EndPos = startPos + FwdVector;
+	FQuat AttackRotation = FRotationMatrix::MakeFromZ(Forward).ToQuat();
 
 	bool Result = GetWorld()->SweepSingleByChannel
 	(
 		OUT HitResult,
 		startPos,
 		EndPos,
-		FQuat::Identity,
+		AttackRotation,
 		ECC_GameTraceChannel1,
 		FCollisionShape::MakeCapsule(AttackRadius, AttackHalfHeight),
 		Params
 	);
 
-	FQuat AttackRotation = FRotationMatrix::MakeFromZ(EndPos).ToQuat();
 	FColor DebugColor = Result ? FColor::Green : FColor::Red;
-
 	FVector Center = startPos + FwdVector * 0.5f;
 
 	DrawDebugCapsule
@@ -132,13 +134,13 @@ void AEnemy::EnemyHit()
 		2.0f
 	);
 
-	if (Result)
+
+	//Damage 주기
+	if (Result && HitResult.GetActor())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Hit"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("No Collision"));
+		auto Target = HitResult.GetActor();
+
+		UGameplayStatics::ApplyDamage(Target, 10.f, GetController(), this, NULL);
 	}
 
 }

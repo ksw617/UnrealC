@@ -65,6 +65,13 @@ void AMyPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	AnimInstace = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
+			
+	//HpWidget 생성후 바이딩
+	auto HpWidget = Cast<UHpUserWidget>(HpBar->GetUserWidgetObject());
+	if (HpWidget)
+	{
+		HpWidget->BindHp(HpComponent);
+	}
 	
 }
 
@@ -95,6 +102,14 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	}
 
+}
+
+float AMyPlayer::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	//Hp에 적용
+	HpComponent->OnDamaged(Damage);
+	
+	return Damage;
 }
 
 void AMyPlayer::Move(const FInputActionValue& Value)
