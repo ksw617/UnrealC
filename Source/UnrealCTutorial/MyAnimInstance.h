@@ -30,11 +30,27 @@ private:
 	UPROPERTY(Category = "Character Jump", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	bool IsFalling;
 private:
-	//추가
 	UPROPERTY(Category = "Aim", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float YawOffset;
 	UPROPERTY(Category = "Aim", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	FRotator AimRotation;
+	UPROPERTY(Category = "Aim", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	float RotateYaw;
+
+	//변경
+	UPROPERTY(Category = "Aim", VisibleAnywhere)
+	FRotator MovingRotation;
+	UPROPERTY(Category = "Aim", VisibleAnywhere)
+	FRotator PrevRotation;
+	//추가
+	UPROPERTY(Category = "Aim", VisibleAnywhere)
+	float PrevDistanceCurve;
+	UPROPERTY(Category = "Aim", VisibleAnywhere)
+	float DistanceCurve;
+	UPROPERTY(Category = "Aim", VisibleAnywhere)
+	float DeltaDistanceCurve;
+
+
 
 private:
 	UPROPERTY(VisibleAnywhere)

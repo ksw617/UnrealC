@@ -65,8 +65,54 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 		YawOffset = DeltaRotation.Yaw;
 
-		//UE_LOG(LogTemp, Log, TEXT("Yaw Offset : %f"), YawOffset);
+		if (ShouldMove || IsFalling)
+		{
+			RotateYaw = FMath::FInterpTo(RotateYaw, 0.f, DeltaSeconds, 20.f);
+			MovingRotation = Character->GetActorRotation();
+			PrevRotation = MovingRotation;
 
+		}
+		else
+		{
+			PrevRotation = MovingRotation;
+			MovingRotation = Character->GetActorRotation();
+			FRotator DeltaMovingRotation = MovingRotation - PrevRotation;
+			DeltaMovingRotation.Normalize();
+			RotateYaw -= DeltaMovingRotation.Yaw;
+
+			float TurnValue = GetCurveValue("Turn");
+
+			if (TurnValue > 0.f)
+			{
+				PrevDistanceCurve = DistanceCurve;
+				DistanceCurve = GetCurveValue("DistanceCurve");
+				DeltaDistanceCurve = DistanceCurve - PrevDistanceCurve;
+
+				if (RotateYaw > 0.f)
+				{
+					RotateYaw -= DeltaDistanceCurve;
+				}
+				else 
+				{
+					RotateYaw += DeltaDistanceCurve;
+				}
+
+				float AbsRotateYawOffset = FMath::Abs(RotateYaw);
+				if (AbsRotateYawOffset > 0.f)
+				{
+					float YawEcess = AbsRotateYawOffset - 90.f;
+					if (RotateYaw > 0.f)	
+					{
+						RotateYaw -= YawEcess;
+					}
+					else   
+					{
+						RotateYaw += YawEcess;
+					}
+				}
+
+			}
+		}
 
 	}
 }
@@ -78,8 +124,6 @@ void UMyAnimInstance::PlayAttackMontage()
 		if (!Montage_IsPlaying(AttackMontage))
 		{
 			Montage_Play(AttackMontage);
-
-			//Character->PlayerAttack();
 		}
 	}
 }
